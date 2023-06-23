@@ -137,3 +137,36 @@ def gradient_descent(x, y, w_in, b_in, cost_function, gradient_function, alpha, 
     return w, b, J_history, w_history #return w and J,w history for graphing
 
     
+# initialize fitting parameters. Recall that the shape of w is (n,)
+initial_w = 0.
+initial_b = 0.
+
+# some gradient descent settings
+iterations = 1500
+alpha = 0.01
+
+w,b,_,_ = gradient_descent(x_train ,y_train, initial_w, initial_b, 
+                     compute_cost, compute_gradient, alpha, iterations)
+print("w,b found by gradient descent:", w, b)
+
+#prediction with new parameters with the best costfunction
+m = x_train.shape[0]
+predicted = np.zeros(m)
+
+for i in range(m):
+    predicted[i] = w * x_train[i] + b
+
+
+# Plot the linear fit
+plt.plot(x_train, predicted, c = "b")
+
+# Create a scatter plot of the data. 
+plt.scatter(x_train, y_train, marker='x', c='r') 
+
+# Set the title
+plt.title("Profits vs. Population per city")
+# Set the y-axis label
+plt.ylabel('Profit in $10,000')
+# Set the x-axis label
+plt.xlabel('Population of City in 10,000s')
+plt.show()
