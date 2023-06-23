@@ -216,6 +216,11 @@ def plot_decision_boundary(w, b, X, y):
         # Plot z = 0.5
         plt.contour(u,v,z, levels = [0.5], colors="g")
 
+def sig(z):
+ 
+    return 1/(1+np.exp(-z))
+
+
 plot_decision_boundary(w, b, X_train, y_train)
 # Set the y-axis label
 plt.ylabel('Exam 2 score') 
@@ -266,3 +271,136 @@ def predict(X, w, b):
 p = predict(X_train, w,b)
 print('Train Accuracy: %f'%(np.mean(p == y_train) * 100))
 
+print("///////////////////////////////////////////////////////////////////////////////////")
+
+# Regularied logistic regression
+
+data = np.loadtxt("data/ex2data2.txt", delimiter=',')
+X_train = data[:,:2]
+y_train = data[:,2]
+
+print ('The shape of X_train is: ' + str(X_train.shape))
+print ('The shape of y_train is: ' + str(y_train.shape))
+print ('We have m = %d training examples' % (len(y_train)))
+
+#this function defined above
+plot_data(X_train, y_train[:], pos_label="Accepted", neg_label="Rejected")
+# Set the y-axis label
+plt.ylabel('Microchip Test 2') 
+# Set the x-axis label
+plt.xlabel('Microchip Test 1') 
+plt.legend(loc="upper right")
+plt.show()
+
+def map_feature(X1, X2):
+    """
+    Feature mapping function to polynomial features    
+    """
+    X1 = np.atleast_1d(X1)
+    X2 = np.atleast_1d(X2)
+    degree = 6
+    out = []
+    for i in range(1, degree+1):
+        for j in range(i + 1):
+            out.append((X1**(i-j) * (X2**j)))
+    return np.stack(out, axis=1)
+
+print("Original shape of data:", X_train.shape)
+
+mapped_X =  map_feature(X_train[:, 0], X_train[:, 1])
+print("Shape after feature mapping:", mapped_X.shape)
+
+#to see value of new featurs
+print("X_train[0]:", X_train[0])
+print("mapped X_train[0]:", mapped_X[0])
+
+
+#computing cost function for logistic regression with regularization
+def compute_cost_reg(X, y, w, b, lambda_ = 1):
+    """
+    Computes the cost over all examples
+    Args:
+      X : (ndarray Shape (m,n)) data, m examples by n features
+      y : (ndarray Shape (m,))  target value 
+      w : (ndarray Shape (n,))  values of parameters of the model      
+      b : (scalar)              value of bias parameter of the model
+      lambda_ : (scalar, float) Controls amount of regularization
+    Returns:
+      total_cost : (scalar)     cost 
+    """
+
+    m, n = X.shape
+    
+    # Calls the compute_cost function that you implemented above
+    cost_without_reg = compute_cost(X, y, w, b) 
+    
+    # You need to calculate this value
+    reg_cost = 0.
+    
+    for j in range(n):
+        reg_cost += w[j]**2
+    reg_cost = (reg_cost * lambda_) / (2*m)
+    
+    # Add the regularization cost to get the total cost
+    total_cost = cost_without_reg + reg_cost
+
+    return total_cost
+
+
+#computed gradient decsent wuth regularization
+def compute_gradient_reg(X, y, w, b, lambda_ = 1): 
+    """
+    Computes the gradient for logistic regression with regularization
+ 
+    Args:
+      X : (ndarray Shape (m,n)) data, m examples by n features
+      y : (ndarray Shape (m,))  target value 
+      w : (ndarray Shape (n,))  values of parameters of the model      
+      b : (scalar)              value of bias parameter of the model
+      lambda_ : (scalar,float)  regularization constant
+    Returns
+      dj_db : (scalar)             The gradient of the cost w.r.t. the parameter b. 
+      dj_dw : (ndarray Shape (n,)) The gradient of the cost w.r.t. the parameters w. 
+
+    """
+    m, n = X.shape
+    
+    dj_db, dj_dw = compute_gradient(X, y, w, b)
+     
+    for j in range(n):
+        dj_dw[j] = dj_dw[j] + (lambda_ / m) * w[j]        
+        
+    return dj_db, dj_dw
+
+
+
+# Initialize fitting parameters
+np.random.seed(1)
+initial_w = np.random.rand(mapped_X.shape[1])-0.5
+initial_b = 1.
+
+# Set regularization parameter lambda_ (you can try varying this)
+lambda_ = 0.01    
+
+# Some gradient descent settings
+iterations = 10000
+alpha = 0.01
+
+w,b, J_history,_ = gradient_descent(mapped_X, y_train, initial_w, initial_b, 
+                                    compute_cost_reg, compute_gradient_reg, 
+                                    alpha, iterations, lambda_)
+
+
+#ploting result
+plot_decision_boundary(w, b, mapped_X, y_train)
+# Set the y-axis label
+plt.ylabel('Microchip Test 2') 
+# Set the x-axis label
+plt.xlabel('Microchip Test 1') 
+plt.legend(loc="upper right")
+plt.show()
+
+#Compute accuracy on the training set
+p = predict(mapped_X, w, b)
+
+print('Train Accuracy: %f'%(np.mean(p == y_train) * 100))
