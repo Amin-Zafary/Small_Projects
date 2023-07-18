@@ -15,8 +15,8 @@ tf.autograph.set_verbosity(0)
 #----------------------------------------------------------------------------------------------------------------------------------
 
 #loading data
-X = np.load("data/X.npy")
-y = np.load("data/y.npy")
+X = np.load("data_binary/X.npy")
+y = np.load("data_binary/y.npy")
 X = X[0:1000]
 y = y[0:1000]
 

@@ -14,8 +14,8 @@ def sigmoid(x):
     return 1. / (1. + np.exp(-x))
 
 
-X = np.load("data/X.npy")
-y = np.load("data/y.npy")
+y = np.load("data_binary/y.npy")
+X = np.load("data_binary/X.npy")
 X = X[0:1000]
 y = y[0:1000]
 
